@@ -137,7 +137,7 @@ end
 
 function parse_implicit_document_start(stream::EventStream)
     token = peek(stream.input)
-    if !in(typeof(token), [DirectiveToken, DocumentStartToken, StreamEndToken])
+    if !in(typeof(token), (DirectiveToken, DocumentStartToken, StreamEndToken))
         stream.tag_handles = DEFAULT_TAGS
         event = DocumentStartEvent(token.span.start_mark, token.span.start_mark,
                                    false)
@@ -203,7 +203,7 @@ end
 
 
 function parse_document_content(stream::EventStream)
-    if in(peek(stream.input), [DirectiveToken, DocumentStartToken, DocumentEndToken,StreamEndToken])
+    if in(peek(stream.input), (DirectiveToken, DocumentStartToken, DocumentEndToken,StreamEndToken))
         event = process_empty_scalar(stream, peek(stream.input).span.start_mark)
         stream.state = pop!(stream.states)
         event
@@ -351,7 +351,7 @@ function parse_block_sequence_entry(stream::EventStream)
     token = peek(stream.input)
     if typeof(token) == BlockEntryToken
         forward!(stream.input)
-        if !in(typeof(peek(stream.input)), [BlockEntryToken, BlockEndToken])
+        if !in(typeof(peek(stream.input)), (BlockEntryToken, BlockEndToken))
             push!(stream.states, parse_block_sequence_entry)
             return parse_block_node(stream)
         else
@@ -377,7 +377,7 @@ function parse_indentless_sequence_entry(stream::EventStream)
     token = peek(stream.input)
     if typeof(token) == BlockEntryToken
         forward!(stream.input)
-        if !in(typeof(peek(stream.input)), [BlockEntryToken, KeyToken, ValueToken, BlockEndToken])
+        if !in(typeof(peek(stream.input)), (BlockEntryToken, KeyToken, ValueToken, BlockEndToken))
             push!(stream.states, parse_indentless_sequence_entry)
             return parse_block_node(stream)
         else
@@ -402,7 +402,7 @@ function parse_block_mapping_key(stream::EventStream)
     token = peek(stream.input)
     if typeof(token) == KeyToken
         forward!(stream.input)
-        if !in(typeof(peek(stream.input)), [KeyToken, ValueToken, BlockEndToken])
+        if !in(typeof(peek(stream.input)), (KeyToken, ValueToken, BlockEndToken))
             push!(stream.states, parse_block_mapping_value)
             return parse_block_node_or_indentless_sequence(stream)
         else
@@ -428,7 +428,7 @@ function parse_block_mapping_value(stream::EventStream)
     token = peek(stream.input)
     if typeof(token) == ValueToken
         forward!(stream.input)
-        if !in(typeof(peek(stream.input)), [KeyToken, ValueToken, BlockEndToken])
+        if !in(typeof(peek(stream.input)), (KeyToken, ValueToken, BlockEndToken))
             push!(stream.states, parse_block_mapping_key)
             parse_block_node_or_indentless_sequence(stream)
         else
@@ -483,7 +483,7 @@ end
 
 function parse_flow_sequence_entry_mapping_key(stream::EventStream)
     token = forward!(stream.input)
-    if !in(typeof(token), [ValueToken, FlowEntryToken, FlowSequenceEndToken])
+    if !in(typeof(token), (ValueToken, FlowEntryToken, FlowSequenceEndToken))
         push!(stream.states, parse_flow_sequence_entry_mapping_value)
         parse_flow_node(stream)
     else
@@ -497,7 +497,7 @@ function parse_flow_sequence_entry_mapping_value(stream::EventStream)
     token = peek(stream.input)
     if typeof(token) == ValueToken
         forward!(stream.input)
-        if !in(typeof(peek(stream.input)), [FlowEntryToken, FlowSequenceEndToken])
+        if !in(typeof(peek(stream.input)), (FlowEntryToken, FlowSequenceEndToken))
             push!(stream.states, parse_flow_sequence_entry_mapping_end)
             parse_flow_node(stream)
         else
@@ -542,7 +542,7 @@ function parse_flow_mapping_key(stream::EventStream; first_entry=false)
         token = peek(stream.input)
         if typeof(token) == KeyToken
             forward!(stream.input)
-            if !in(typeof(peek(stream.input)), [ValueToken, FlowEntryToken, FlowMappingEndToken])
+            if !in(typeof(peek(stream.input)), (ValueToken, FlowEntryToken, FlowMappingEndToken))
                 push!(stream.states, parse_flow_mapping_value)
                 return parse_flow_node(stream)
             else
@@ -566,7 +566,7 @@ function parse_flow_mapping_value(stream::EventStream)
     token = peek(stream.input)
     if typeof(token) == ValueToken
         forward!(stream.input)
-        if !in(typeof(peek(stream.input)), [FlowEntryToken, FlowMappingEndToken])
+        if !in(typeof(peek(stream.input)), (FlowEntryToken, FlowMappingEndToken))
             push!(stream.states, parse_flow_mapping_key)
             parse_flow_node(stream)
         else

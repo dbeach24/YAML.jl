@@ -2,7 +2,7 @@
 
 import YAML
 
-tests = [
+const TESTS = [
     "spec-02-01",
     "spec-02-02",
     "spec-02-03",
@@ -31,60 +31,26 @@ tests = [
     "windows_newlines",
     "issue15",
     "issue30",
-
 ]
 
+const TEST_DIR = dirname(@__FILE__)
 
-function equivalent(xs::Dict, ys::Dict)
-    if Set(collect(keys(xs))) != Set(collect(keys(ys)))
-        return false
-    end
+function run_tests()
 
-    for k in keys(xs)
-        if !equivalent(xs[k], ys[k])
-            return false
+    testdir = TEST_DIR
+
+    for test in TESTS
+        data = YAML.load_file(joinpath(testdir, string(test, ".data")))
+        expected = evalfile(joinpath(testdir, string(test, ".expected")))
+        if !isequal(data, expected)
+            @printf("%s: FAILED\n", test)
+            @printf("Expected:\n%s\nParsed:\n%s\n",
+                    expected, data)
+        else
+            @printf("%s: PASSED\n", test)
         end
     end
 
-    true
 end
 
-
-function equivalent(xs::AbstractArray, ys::AbstractArray)
-    if length(xs) != length(ys)
-        return false
-    end
-
-    for (x, y) in zip(xs, ys)
-        if !equivalent(x, y)
-            return false
-        end
-    end
-
-    true
-end
-
-
-function equivalent(x::Float64, y::Float64)
-    isnan(x) && isnan(y) ? true : x == y
-end
-
-
-function equivalent(x, y)
-    x == y
-end
-
-
-testdir = dirname(@__FILE__)
-
-for test in tests
-    data = YAML.load_file(joinpath(testdir, string(test, ".data")))
-    expected = evalfile(joinpath(testdir, string(test, ".expected")))
-    if !equivalent(data, expected)
-        @printf("%s: FAILED\n", test)
-        @printf("Expected:\n%s\nParsed:\n%s\n",
-                expected, data)
-    else
-        @printf("%s: PASSED\n", test)
-    end
-end
+run_tests()
